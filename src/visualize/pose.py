@@ -6,11 +6,8 @@ from numpy.typing import NDArray
 
 
 def write_frame(
-    frame: NDArray, pose_data_lst: List[Dict[str, Any]], frame_num: int, is_no_bg: bool
+    frame: NDArray, pose_data_lst: List[Dict[str, Any]], frame_num: int
 ) -> NDArray:
-    if is_no_bg:
-        frame = np.full_like(frame, 220, dtype=np.uint8)
-
     # add keypoints to image
     frame = put_frame_num(frame, frame_num)
     for kps in pose_data_lst:
