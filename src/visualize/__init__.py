@@ -3,8 +3,8 @@ import os
 
 from tqdm import tqdm
 
-from modules import PoseDataHandler
-from modules.utils.video import Capture, Writer
+from src import PoseDataHandler
+from src.utils.video import Capture, Writer
 
 from . import pose as pose_vis
 

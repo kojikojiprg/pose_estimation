@@ -8,8 +8,8 @@ from glob import glob
 import torch
 
 sys.path.append(".")
-from modules.pose import PoseEstimation
-from modules.visualize import Visualizer
+from src import PoseEstimation
+from src.visualize import Visualizer
 
 warnings.simplefilter("ignore")
 
@@ -34,7 +34,7 @@ def parser():
     )
 
     # options
-    parser.add_argument("-c", "--cfg_path", type=str, default="configs/pose/pose.yaml")
+    parser.add_argument("-c", "--cfg_path", type=str, default="configs/pose.yaml")
     parser.add_argument(
         "-dg", "--det_gpu", type=int, default=0, help="gpu number of detector"
     )
@@ -44,18 +44,8 @@ def parser():
     parser.add_argument(
         "-v", "--video", default=False, action="store_true", help="with writing video"
     )
-    parser.add_argument(
-        "-nb",
-        "--video_no_background",
-        default=False,
-        action="store_true",
-        help="with writing video in no background",
-    )
 
     args = parser.parse_args()
-
-    if args.video_no_background:
-        args.video = True
 
     return args
 

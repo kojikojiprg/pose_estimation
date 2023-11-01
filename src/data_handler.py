@@ -2,7 +2,7 @@ import gc
 import os
 from typing import Any, Dict, List, Optional, Tuple
 
-from modules.utils import json_handler, video
+from src.utils import json_handler, video
 
 from .format import Format
 

@@ -8,7 +8,7 @@ from mmpose.structures import PoseDataSample
 from numpy.typing import NDArray
 from tqdm import tqdm
 
-from modules.utils.video import Capture
+from src.utils.video import Capture
 
 from ..format import Format
 from .detection import Detector
