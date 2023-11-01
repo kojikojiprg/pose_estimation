@@ -1,0 +1,14 @@
+numpy
+tqdm
+PyYAML
+types-PyYAML
+
+opencv-python
+mmcv-full
+mmdet
+mmpose
+
+black
+flake8
+mypy
+isort
