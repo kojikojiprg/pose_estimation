@@ -4,7 +4,6 @@ from typing import Optional, Tuple
 
 import cv2
 import numpy as np
-from numpy.typing import NDArray
 
 
 class Capture:
@@ -42,7 +41,7 @@ class Capture:
     def set_pos_frame_time(self, begin_sec: int):
         self._cap.set(cv2.CAP_PROP_POS_FRAMES, begin_sec * self.fps)
 
-    def read(self, idx: Optional[int] = None) -> Tuple[bool, Optional[NDArray]]:
+    def read(self, idx: Optional[int] = None) -> Tuple[bool, Optional[np.array]]:
         if idx is not None:
             self.set_pos_frame_count(idx)
 
@@ -78,7 +77,7 @@ class Writer:
             self._writer.write(frame)
 
 
-def concat_frames(frame1: NDArray, frame2: NDArray) -> NDArray:
+def concat_frames(frame1: np.array, frame2: np.array) -> np.array:
     # change frame2 height and merge to frame1
     ratio = frame1.shape[0] / frame2.shape[0]
     size = (round(frame2.shape[1] * ratio), frame1.shape[0])
@@ -88,6 +87,6 @@ def concat_frames(frame1: NDArray, frame2: NDArray) -> NDArray:
     return frame1
 
 
-def get_concat_frame_size(frame: NDArray, field: NDArray) -> Tuple[int, ...]:
+def get_concat_frame_size(frame: np.array, field: np.array) -> Tuple[int, ...]:
     cmb_img = concat_frames(frame, field)
     return cmb_img.shape[1::-1]

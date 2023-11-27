@@ -7,7 +7,6 @@ from typing import Dict, List
 
 import numpy as np
 import yaml
-from numpy.typing import NDArray
 from torchvision.transforms import transforms as T
 
 sys.path.append(os.path.join("submodules/unitrack/"))
@@ -41,7 +40,7 @@ class Tracker:
         del self.tracker, self.transforms
         gc.collect()
 
-    def update(self, img: NDArray, kps_all: NDArray):
+    def update(self, img: np.array, kps_all: np.array):
         process_img = img.copy()
 
         # Normalize RGB
@@ -62,7 +61,7 @@ class Tracker:
         return tracks
 
     @staticmethod
-    def _cvt_kp2ob(kps: NDArray):
+    def _cvt_kp2ob(kps: np.array):
         # https://github.com/leonid-pishchulin/poseval
         return [
             {"id": [i], "x": [kp[0]], "y": [kp[1]], "score": [kp[2]]}

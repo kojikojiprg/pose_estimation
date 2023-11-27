@@ -2,12 +2,11 @@ from typing import Any, Dict, List
 
 import cv2
 import numpy as np
-from numpy.typing import NDArray
 
 
 def write_frame(
-    frame: NDArray, pose_data_lst: List[Dict[str, Any]], frame_num: int
-) -> NDArray:
+    frame: np.array, pose_data_lst: List[Dict[str, Any]], frame_num: int
+) -> np.array:
     # add keypoints to image
     frame = put_frame_num(frame, frame_num)
     for kps in pose_data_lst:
@@ -17,7 +16,7 @@ def write_frame(
     return frame
 
 
-def put_frame_num(img: NDArray, frame_num: int):
+def put_frame_num(img: np.array, frame_num: int):
     return cv2.putText(
         img,
         "Frame:{}".format(frame_num),
@@ -28,7 +27,7 @@ def put_frame_num(img: NDArray, frame_num: int):
     )
 
 
-def draw_bbox(frame: NDArray, bbox: NDArray):
+def draw_bbox(frame: np.array, bbox: np.array):
     bbox = bbox.astype(int)
     points = [
         (bbox[0][0], bbox[0][1]),
@@ -44,7 +43,7 @@ def draw_bbox(frame: NDArray, bbox: NDArray):
     return frame
 
 
-def _draw_skeleton(frame: NDArray, t_id: int, kps: NDArray, vis_thresh: float = 0.2):
+def _draw_skeleton(frame: np.array, t_id: int, kps: np.array, vis_thresh: float = 0.2):
     l_pair = [
         (0, 1),
         (0, 2),

@@ -1,0 +1,4 @@
+mmcv
+# mmcv-full
+mmdet
+mmpose

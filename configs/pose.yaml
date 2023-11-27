@@ -1,7 +1,7 @@
 configs:
-  mmdet: "configs/pose/mmdet/yolox.yaml"
-  mmpose: "configs/pose/mmpose/hrnet.yaml"
-  unitrack: "configs/pose/unitrack/detco.yaml"
+  mmdet: "configs/mmdet/yolox.yaml"
+  mmpose: "configs/mmpose/hrnet.yaml"
+  unitrack: "configs/unitrack/detco.yaml"
 th_bbox: 0.2
 th_iou: 0.95
 th_delete: 0.3 # threshold of confidence score of keypoints

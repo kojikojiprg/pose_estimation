@@ -9,7 +9,6 @@ from mmpose.apis import inference_bottomup, inference_topdown, init_model
 from mmpose.evaluation.functional import nms
 from mmpose.structures import PoseDataSample
 from mmpose.utils import adapt_mmdet_pipeline
-from numpy.typing import NDArray
 
 
 class Detector:
@@ -40,7 +39,7 @@ class Detector:
         del self._det_model, self._pose_model
         gc.collect()
 
-    def predict(self, img: NDArray):
+    def predict(self, img: np.array):
         if self._model_type == "top-down":
             return self.predict_top_down(img)
         else:
@@ -60,7 +59,7 @@ class Detector:
         bboxes = bboxes[nms(bboxes, th_iou), :4]
         return bboxes
 
-    def predict_top_down(self, img: NDArray) -> List[PoseDataSample]:
+    def predict_top_down(self, img: np.array) -> List[PoseDataSample]:
         det_results = inference_detector(self._det_model, img)
         bboxes = self._process_mmdet_results(
             det_results,
@@ -78,7 +77,7 @@ class Detector:
 
         return pose_results
 
-    def predict_bottom_up(self, img: NDArray):
+    def predict_bottom_up(self, img: np.array):
         # TODO: modify for updating
         pose_results, heatmaps = inference_bottomup(
             self._pose_model,

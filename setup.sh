@@ -2,6 +2,8 @@
 pip install -U pip
 pip install wheel
 pip install -r requirements.txt
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu117
+pip install -r requirements-mmcv.txt
 
 git submodule update --init
 
@@ -26,7 +28,7 @@ git submodule update --init
 
 # install unitrack
 cd submodules/unitrack
-pip install imageio  # install one by one because of avoiding error
+pip install imageio  # install one by one for avoiding error
 pip install lap
 pip install cython
 pip install cython_bbox

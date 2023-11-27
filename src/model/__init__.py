@@ -5,7 +5,6 @@ import cv2
 import numpy as np
 import torch
 from mmpose.structures import PoseDataSample
-from numpy.typing import NDArray
 from tqdm import tqdm
 
 from src.utils.video import Capture
@@ -122,11 +121,11 @@ class PoseModel:
         return results
 
     @staticmethod
-    def _del_leaky(kps: NDArray, th_delete: float):
+    def _del_leaky(kps: np.array, th_delete: float):
         return np.where(np.mean(kps[:, :, 2], axis=1) >= th_delete)[0]
 
     @staticmethod
-    def _get_unique(kps: NDArray, indices: NDArray, th_diff: float, th_count: int):
+    def _get_unique(kps: np.array, indices: np.array, th_diff: float, th_count: int):
         remain_indices = np.empty((0,), dtype=np.int32)
 
         for idx in indices:

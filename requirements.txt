@@ -1,12 +1,9 @@
-numpy
+numpy==1.19.5
 tqdm
-PyYAML
+pyyaml
 types-PyYAML
 
 opencv-python
-mmcv-full
-mmdet
-mmpose
 
 black
 flake8
