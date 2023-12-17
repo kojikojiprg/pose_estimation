@@ -3,12 +3,13 @@ from typing import List
 
 import numpy as np
 from mmdet.apis import inference_detector, init_detector
-from mmengine import init_default_scope
 from mmengine.config import Config
+from mmengine.registry import DefaultScope
 from mmpose.apis import inference_bottomup, inference_topdown, init_model
 from mmpose.evaluation.functional import nms
 from mmpose.structures import PoseDataSample
 from mmpose.utils import adapt_mmdet_pipeline
+from mmyolo.utils import register_all_modules
 
 
 class Detector:
@@ -17,7 +18,6 @@ class Detector:
         self._device = device
 
         # build the pose model from a config file and a checkpoint file
-        init_default_scope("mmpose")
         mmpose_cfg = Config.fromfile(cfg["configs"]["mmpose"])
         self._pose_model = init_model(
             mmpose_cfg.config, mmpose_cfg.weights, device=device
@@ -27,13 +27,12 @@ class Detector:
         self._det_model = None
         if self._model_type == "top-down":
             # build the detection model from a config file and a checkpoint file
-            init_default_scope("mmdet")
-            mmdet_cfg = Config.fromfile(cfg["configs"]["mmdet"])
+            register_all_modules()
+            mmdet_cfg = Config.fromfile(cfg["configs"]["mmyolo"])
             self._det_model = init_detector(
                 mmdet_cfg.config, mmdet_cfg.weights, device=device
             )
             self._det_model.cfg = adapt_mmdet_pipeline(self._det_model.cfg)
-        init_default_scope("mmpose")
 
     def __del__(self):
         del self._det_model, self._pose_model
@@ -60,7 +59,8 @@ class Detector:
         return bboxes
 
     def predict_top_down(self, img: np.array) -> List[PoseDataSample]:
-        det_results = inference_detector(self._det_model, img)
+        with DefaultScope.overwrite_default_scope("mmyolo"):
+            det_results = inference_detector(self._det_model, img)
         bboxes = self._process_mmdet_results(
             det_results,
             cat_id=0,
@@ -68,12 +68,13 @@ class Detector:
             th_iou=self._cfg["th_iou"],
         )
 
-        pose_results = inference_topdown(
-            self._pose_model,
-            img,
-            bboxes,
-            bbox_format="xyxy",
-        )
+        with DefaultScope.overwrite_default_scope("mmpose"):
+            pose_results = inference_topdown(
+                self._pose_model,
+                img,
+                bboxes,
+                bbox_format="xyxy",
+            )
 
         return pose_results
 

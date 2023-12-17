@@ -1,5 +1,6 @@
 configs:
-  mmdet: "configs/mmdet/yolox.yaml"
+  # mmdet: "configs/mmdet/yolox.yaml"
+  mmyolo: "configs/mmyolo/yolov8.yaml"
   mmpose: "configs/mmpose/hrnet.yaml"
   unitrack: "configs/unitrack/detco.yaml"
 th_bbox: 0.2
