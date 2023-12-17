@@ -2,3 +2,4 @@ mmcv
 # mmcv-full
 mmdet
 mmpose
+mmyolo
