@@ -35,12 +35,7 @@ def parser():
 
     # options
     parser.add_argument("-c", "--cfg_path", type=str, default="configs/pose.yaml")
-    parser.add_argument(
-        "-dg", "--det_gpu", type=int, default=0, help="gpu number of detector"
-    )
-    parser.add_argument(
-        "-tg", "--trk_gpu", type=int, default=0, help="gpu number of tracker"
-    )
+    parser.add_argument("-g", "--gpu", type=int, default=0, help="gpu number")
     parser.add_argument(
         "-v", "--video", default=False, action="store_true", help="with writing video"
     )
@@ -69,7 +64,7 @@ def main():
         os.makedirs(data_dir, exist_ok=True)
 
     # load model
-    pe = PoseEstimation(args.cfg_path, args.det_gpu, args.trk_gpu)
+    pe = PoseEstimation(args.cfg_path, args.gpu)
 
     if args.video:
         vis = Visualizer(args)

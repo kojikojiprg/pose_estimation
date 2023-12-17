@@ -11,13 +11,12 @@ class PoseEstimation:
     def __init__(
         self,
         cfg_path: str,
-        det_gpu: int,
-        trk_gpu: int,
+        gpu: int,
     ):
         with open(cfg_path, "r") as f:
             cfg = yaml.safe_load(f)
 
-        self._model = PoseModel(cfg, det_gpu, trk_gpu)
+        self._model = PoseModel(cfg, gpu)
 
     def __del__(self):
         del self._model

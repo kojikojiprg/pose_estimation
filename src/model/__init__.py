@@ -18,16 +18,15 @@ class PoseModel:
     def __init__(
         self,
         pose_cfg: dict,
-        det_gpu: int,
-        trk_gpu: int,
+        gpu: int,
         with_clahe: bool = False,
     ):
         self._cfg = pose_cfg
 
         print("=> loading detector model")
-        self._detector = Detector(self._cfg, f"cuda:{det_gpu}")
+        self._detector = Detector(self._cfg, f"cuda:{gpu}")
         print("=> loading tracker model")
-        self._tracker = Tracker(self._cfg, f"cuda:{trk_gpu}")
+        self._tracker = Tracker(self._cfg, f"cuda:{gpu}")
 
         self._with_clahe = with_clahe
         if with_clahe:
