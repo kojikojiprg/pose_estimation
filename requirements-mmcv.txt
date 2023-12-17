@@ -1,5 +1,5 @@
-mmcv
+mmcv==2.0.1
 # mmcv-full
-mmdet
-mmpose
-mmyolo
+mmdet==3.2.0
+mmpose==1.2.0
+mmyolo==0.6.0
