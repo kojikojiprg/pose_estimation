@@ -48,7 +48,7 @@ def parser():
 def main():
     args = parser()
 
-    torch.cuda.set_device(args.det_gpu)
+    torch.cuda.set_device(args.gpu)
 
     # load video paths
     video_dir = args.video_dir
