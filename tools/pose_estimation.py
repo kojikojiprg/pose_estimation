@@ -19,18 +19,9 @@ def parser():
 
     # requires
     parser.add_argument(
-        "-vd",
-        "--video_dir",
-        required=True,
+        "video_dir",
         type=str,
-        help="path of input video directory",
-    )
-    parser.add_argument(
-        "-od",
-        "--output_dir",
-        required=True,
-        type=str,
-        help="path of output data directory",
+        help="path of video directory",
     )
 
     # options
@@ -56,12 +47,12 @@ def main():
     print(f"=> video paths:\n{video_paths}")
 
     # prepairing output data dirs
-    data_dirs = []
+    out_dirs = []
     for video_path in video_paths:
         name = os.path.basename(video_path).replace(".mp4", "")
-        data_dir = os.path.join(args.output_dir, name)
-        data_dirs.append(data_dir)
-        os.makedirs(data_dir, exist_ok=True)
+        out_dir = os.path.join(video_dir, name)
+        out_dirs.append(out_dir)
+        os.makedirs(out_dir, exist_ok=True)
 
     # load model
     pe = PoseEstimation(args.cfg_path, args.gpu)
@@ -69,12 +60,12 @@ def main():
     if args.video:
         vis = Visualizer(args)
 
-    for video_path, data_dir in zip(video_paths, data_dirs):
+    for video_path, out_dir in zip(video_paths, out_dirs):
         print(f"=> processing {video_path}")
-        pe.inference(video_path, data_dir)
+        pe.inference(video_path, out_dir)
 
         if args.video:
-            vis.visualise(video_path, data_dir)
+            vis.visualise(video_path, out_dir)
 
 
 if __name__ == "__main__":
