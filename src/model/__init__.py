@@ -106,7 +106,7 @@ class PoseModel:
 
                 # create result
                 result = {
-                    Format.frame_num: int(frame_num),
+                    Format.n_frame: int(frame_num),
                     Format.id: int(t.track_id),
                     Format.bbox: bboxs[i],
                     Format.keypoints: kps[i],
