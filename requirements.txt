@@ -4,6 +4,10 @@ pyyaml
 
 opencv-python
 
+torch
+torchvision
+ultralytics
+
 black
 flake8
 mypy
