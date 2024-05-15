@@ -1,7 +1,6 @@
-numpy==1.19.5
+numpy
 tqdm
 pyyaml
-types-PyYAML
 
 opencv-python
 
