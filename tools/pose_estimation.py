@@ -25,7 +25,7 @@ def parser():
     )
 
     # options
-    parser.add_argument("-c", "--cfg_path", type=str, default="configs/pose.yaml")
+    parser.add_argument("-c", "--cfg_path", type=str, default="configs/config.yaml")
     parser.add_argument("-g", "--gpu", type=int, default=0, help="gpu number")
     parser.add_argument(
         "-v", "--video", default=False, action="store_true", help="with writing video"

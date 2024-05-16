@@ -1,73 +1,24 @@
 import gc
-import importlib
-import os
 import sys
 from types import SimpleNamespace
-from typing import Dict, List
 
 import numpy as np
-import yaml
-from torchvision.transforms import transforms as T
+from numpy.typing import NDArray
 
-sys.path.append(os.path.join("submodules/unitrack/"))
-import utils
-
-importlib.reload(utils)
-sys.path.append("submodules")
-from unitrack.tracker.mot.pose import PoseAssociationTracker
+sys.path.append("submodules/BoostTrack/")
+from tracker.boost_track import BoostTrack
 
 
 class Tracker:
-    def __init__(self, cfg: dict, device: str):
-        # set config
-        opts = SimpleNamespace(**{})
-        with open(cfg["configs"]["unitrack"]) as f:
-            common_args = yaml.safe_load(f)
-        for k, v in common_args["common"].items():
-            setattr(opts, k, v)
-        for k, v in common_args["posetrack"].items():
-            setattr(opts, k, v)
-        opts.return_stage = 2
-        opts.device = device  # assign device
-
-        self.transforms = T.Compose(
-            [T.ToTensor(), T.Normalize(opts.im_mean, opts.im_std)]
-        )
-
-        self.tracker = PoseAssociationTracker(opts)
+    def __init__(self, cfg: SimpleNamespace, device: str):
+        self.tracker = BoostTrack(**cfg.tracking.__dict__)
 
     def __del__(self):
-        del self.tracker, self.transforms
+        self.tracker.dump_cache()
+        del self.tracker
         gc.collect()
 
-    def update(self, img: np.array, kps_all: np.array):
-        process_img = img.copy()
-
-        # Normalize RGB
-        process_img = process_img / 255.0
-        process_img = process_img[:, :, ::-1]
-        process_img = np.ascontiguousarray(process_img)
-        process_img = self.transforms(process_img)
-
-        obs = np.array([self._cvt_kp2ob(kps) for kps in kps_all])
-
-        tracks = self.tracker.update(process_img, img, obs)
-        for t in tracks:
-            if not isinstance(t.pose[0], list):
-                t.pose = self._cvt_ob2kp(t.pose)
-            else:
-                tracks.remove(t)  # remove not updated track
-
+    def update(self, bboxs: NDArray, img: NDArray):
+        img_tensor = np.array([img]).transpose(0, 3, 1, 2)
+        tracks = self.tracker.update(bboxs, img_tensor, img, None)
         return tracks
-
-    @staticmethod
-    def _cvt_kp2ob(kps: np.array):
-        # https://github.com/leonid-pishchulin/poseval
-        return [
-            {"id": [i], "x": [kp[0]], "y": [kp[1]], "score": [kp[2]]}
-            for i, kp in enumerate(kps)
-        ]
-
-    @staticmethod
-    def _cvt_ob2kp(ob: List[Dict[str, list]]):
-        return [[pt["x"][0], pt["y"][0], pt["score"][0]] for pt in ob]

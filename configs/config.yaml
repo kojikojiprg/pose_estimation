@@ -17,8 +17,9 @@ transform:
     - 0.4822
     - 0.4465
   im_std: [0.2023, 0.1994, 0.2010]
+
 tracking:
-  det_thresh: 0.6
+  det_thresh: 0.2
   lambda_iou: 0.5
   lambda_mhd: 0.25
   lambda_shape: 0.25

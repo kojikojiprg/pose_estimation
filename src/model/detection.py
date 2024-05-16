@@ -1,89 +1,113 @@
 import gc
-from typing import List
+import os
+from types import SimpleNamespace
+from typing import List, Tuple
 
 import numpy as np
-from mmdet.apis import inference_detector, init_detector
-from mmengine.config import Config
-from mmengine.registry import DefaultScope
-from mmpose.apis import inference_bottomup, inference_topdown, init_model
+from mmpose.apis import inference_topdown, init_model
 from mmpose.evaluation.functional import nms
 from mmpose.structures import PoseDataSample
-from mmpose.utils import adapt_mmdet_pipeline
-from mmyolo.utils import register_all_modules
+from numpy.typing import NDArray
+from ultralytics import YOLO
 
 
 class Detector:
-    def __init__(self, cfg: dict, device: str):
+    def __init__(
+        self, cfg: SimpleNamespace, device: str, model_cache_dir: str = "models"
+    ):
         self._cfg = cfg
-        self._device = device
 
-        # build the pose model from a config file and a checkpoint file
-        mmpose_cfg = Config.fromfile(cfg["configs"]["mmpose"])
-        self._pose_model = init_model(
-            mmpose_cfg.config, mmpose_cfg.weights, device=device
-        )
-        self._model_type = mmpose_cfg.type
+        yolo_model = cfg.yolo.model
+        model_path = os.path.join(model_cache_dir, "yolo", yolo_model)
+        if os.path.exists(model_path):
+            self._yolo = YOLO(model_path)
+        else:
+            self._yolo = YOLO(yolo_model)
+            os.makedirs(os.path.dirname(model_path), exist_ok=True)
+            os.rename(yolo_model, model_path)
+        self._yolo = self._yolo.to(device)
 
-        self._det_model = None
-        if self._model_type == "top-down":
-            # build the detection model from a config file and a checkpoint file
-            register_all_modules()
-            mmdet_cfg = Config.fromfile(cfg["configs"]["mmyolo"])
-            self._det_model = init_detector(
-                mmdet_cfg.config, mmdet_cfg.weights, device=device
-            )
-            self._det_model.cfg = adapt_mmdet_pipeline(self._det_model.cfg)
+        self._pose_model = init_model(cfg.pose.config, cfg.pose.weights, device=device)
 
     def __del__(self):
-        del self._det_model, self._pose_model
+        del self._yolo, self._pose_model
         gc.collect()
 
-    def predict(self, img: np.array):
-        if self._model_type == "top-down":
-            return self.predict_top_down(img)
-        else:
-            return self.predict_bottom_up(img)
+    def predict(self, img: np.array) -> Tuple[NDArray, NDArray]:
+        bboxs = self._yolo.predict(img, verbose=False)[0].boxes.data.cpu().numpy()
+        bboxs = self._process_yolo_results(bboxs)
 
-    def _process_mmdet_results(self, det_result, cat_id, th_bbox, th_iou):
-        pred_instance = det_result.pred_instances.cpu().numpy()
-        bboxes = np.concatenate(
-            (pred_instance.bboxes, pred_instance.scores[:, None]), axis=1
-        )
-        bboxes = bboxes[
-            np.logical_and(
-                pred_instance.labels == cat_id,
-                pred_instance.scores > th_bbox,
-            )
-        ]
-        bboxes = bboxes[nms(bboxes, th_iou), :4]
-        return bboxes
-
-    def predict_top_down(self, img: np.array) -> List[PoseDataSample]:
-        with DefaultScope.overwrite_default_scope("mmyolo"):
-            det_results = inference_detector(self._det_model, img)
-        bboxes = self._process_mmdet_results(
-            det_results,
-            cat_id=0,
-            th_bbox=self._cfg["th_bbox"],
-            th_iou=self._cfg["th_iou"],
-        )
-
-        with DefaultScope.overwrite_default_scope("mmpose"):
-            pose_results = inference_topdown(
-                self._pose_model,
-                img,
-                bboxes,
-                bbox_format="xyxy",
-            )
-
-        return pose_results
-
-    def predict_bottom_up(self, img: np.array):
-        # TODO: modify for updating
-        pose_results, heatmaps = inference_bottomup(
+        pose_results = inference_topdown(
             self._pose_model,
             img,
-            dataset=self._pose_model.cfg.data.test.type,
+            bboxs[:, :4],
+            bbox_format="xyxy",
         )
 
-        return pose_results, heatmaps
+        # extract unique result
+        # bboxs = self._get_bboxs_from_det_results(pose_results)
+        kps = self._collect_kps(pose_results)
+        if len(kps) > 0:
+            remain_indices = self._del_leaky(kps)
+            remain_indices = self._get_unique(kps, remain_indices)
+            bboxs = bboxs[remain_indices]
+            kps = kps[remain_indices]
+
+        return bboxs, kps
+
+    def _process_yolo_results(self, bboxs):
+        bboxs = bboxs[
+            np.logical_and(bboxs[:, 4] > self._cfg.yolo.th_conf, bboxs[:, 5] == 0)
+        ]
+        bboxs = bboxs[nms(bboxs, self._cfg.yolo.th_iou), :5]
+        # areas = (bboxes[:, 2] - bboxes[:, 0]) * (bboxes[:, 3] - bboxes[:, 1])
+        # bboxes = bboxes[
+        #     (self._cfg.yolo.min_area < areas) & (areas < self._cfg.yolo.max_area)
+        # ]
+        return bboxs
+
+    # @staticmethod
+    # def _collect_bboxs_from_pose(det_results: List[PoseDataSample]):
+    #     return np.array([result.pred_instances.bboxes[0] for result in det_results])
+
+    @staticmethod
+    def _collect_kps(det_results: List[PoseDataSample]):
+        return np.array(
+            [
+                np.hstack(
+                    [
+                        result.pred_instances.keypoints[0],
+                        result.pred_instances.keypoint_scores.T,
+                    ]
+                )
+                for result in det_results
+            ]
+        )
+
+    def _del_leaky(self, kps: NDArray):
+        return np.where(np.mean(kps[:, :, 2], axis=1) >= self._cfg.pose.th_delete)[0]
+
+    def _get_unique(self, kps: NDArray, indices: NDArray):
+        remain_indices = np.empty((0,), dtype=np.int32)
+
+        for idx in indices:
+            for ridx in remain_indices:
+                # calc diff of all points
+                diff = np.linalg.norm(kps[idx, :, :2] - kps[ridx, :, :2], axis=1)
+
+                if (
+                    len(np.where(diff < self._cfg.pose.th_diff)[0])
+                    >= self._cfg.pose.th_count
+                ):
+                    # found overlap
+                    if np.mean(kps[idx, :, 2]) > np.mean(kps[ridx, :, 2]):
+                        # select one which is more confidence
+                        remain_indices[remain_indices == ridx] = idx
+
+                    break
+            else:
+                # if there aren't overlapped
+                remain_indices = np.append(remain_indices, idx)
+
+        # return unique_kps
+        return remain_indices

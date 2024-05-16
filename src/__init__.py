@@ -1,10 +1,9 @@
 import gc
 
-import yaml
-
 from .data_handler import PoseDataHandler
 from .format import Format as PoseDataFormat
 from .model import PoseModel
+from .utils import yaml_handler
 
 
 class PoseEstimation:
@@ -13,9 +12,7 @@ class PoseEstimation:
         cfg_path: str,
         gpu: int,
     ):
-        with open(cfg_path, "r") as f:
-            cfg = yaml.safe_load(f)
-
+        cfg = yaml_handler.load(cfg_path)
         self._model = PoseModel(cfg, gpu)
 
     def __del__(self):

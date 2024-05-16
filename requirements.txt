@@ -1,12 +1,19 @@
 numpy
 tqdm
 pyyaml
-
+gdown
 opencv-python
+lap
 
 torch
 torchvision
 ultralytics
+torchreid
+tensorboard
+
+mmcv==2.1.0
+mmpose
+mmdet
 
 black
 flake8
