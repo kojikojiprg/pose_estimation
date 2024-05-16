@@ -73,7 +73,7 @@ def main():
             results.append(preds)
 
             if args.video:
-                out_frames.append(vis.write_frame(frame))
+                out_frames.append(vis.write_frame(frame, preds, frame_num))
 
         # save results
         data_path = os.path.join(out_dir, "json", "pose.json")
