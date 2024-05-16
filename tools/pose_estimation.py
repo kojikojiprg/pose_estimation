@@ -58,7 +58,7 @@ def main():
     # load model
     pe = PoseEstimation(args.cfg_path, args.gpu)
 
-    for video_path, out_dir in zip(tqdm(video_paths[:1], ncols=100), out_dirs):
+    for video_path, out_dir in zip(tqdm(video_paths, ncols=100), out_dirs):
         # load video
         cap = Capture(video_path)
 
