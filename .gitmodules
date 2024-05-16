@@ -1,6 +1,6 @@
 [submodule "submodules/BoostTrack"]
 	path = submodules/BoostTrack
 	url = https://github.com/vukasin-stanojevic/BoostTrack.git
-[submodule "submodules/ViTPose"]
-	path = submodules/ViTPose
-	url = https://github.com/ViTAE-Transformer/ViTPose.git
+[submodule "submodules/mmpose"]
+	path = submodules/mmpose
+	url = https://github.com/open-mmlab/mmpose.git
