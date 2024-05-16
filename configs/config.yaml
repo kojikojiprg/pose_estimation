@@ -3,20 +3,13 @@ pose:
   config: submodules/mmpose/configs/body_2d_keypoint/topdown_heatmap/coco/td-hm_ViTPose-huge_8xb64-210e_coco-256x192.py
   weights: https://download.openmmlab.com/mmpose/v1/body_2d_keypoint/topdown_heatmap/coco/td-hm_ViTPose-huge_3rdparty_coco-256x192-5b738c8e_20230314.pth
   th_delete: 0.3 # threshold of confidence score of keypoints
-  th_diff: 10  # threshold of difference for finding same keypoints
-  th_count: 10
+  th_diff: 20  # threshold of difference for finding same keypoints
+  th_count: 5
 
 yolo:
-  model: "yolov8x.pt"
+  model: "yolov8m.pt"
   th_conf: 0.2
   th_iou: 0.95
-
-transform:
-  im_mean:
-    - 0.4914
-    - 0.4822
-    - 0.4465
-  im_std: [0.2023, 0.1994, 0.2010]
 
 tracking:
   det_thresh: 0.2

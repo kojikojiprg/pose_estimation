@@ -1,5 +1,7 @@
 import numpy as np
+import scipy
 from numpy.typing import NDArray
+import scipy.stats
 
 from .model import Detector, Tracker
 from .utils import yaml_handler
@@ -36,12 +38,10 @@ class PoseEstimation:
         results = []
         for t in tracks:
             # get id is closed kps
-            i = np.where(np.isclose(t[:4], bboxs[:, :4]))[0]
-            if len(i) == 0:
+            near_idxs = np.where(np.isclose(t[:4], bboxs[:, :4], atol=10.0))[0]
+            if len(near_idxs) < 2:
                 continue
-
-            # select minimum index
-            i = np.min(i)
+            i = scipy.stats.mode(near_idxs).mode
 
             # create result
             result = {
