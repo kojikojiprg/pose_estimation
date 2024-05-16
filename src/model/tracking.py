@@ -1,4 +1,3 @@
-import gc
 import sys
 from types import SimpleNamespace
 
@@ -16,7 +15,6 @@ class Tracker:
     def __del__(self):
         self.tracker.dump_cache()
         del self.tracker
-        gc.collect()
 
     def update(self, bboxs: NDArray, img: NDArray):
         img_tensor = np.array([img]).transpose(0, 3, 1, 2)

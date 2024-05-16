@@ -6,12 +6,14 @@ import warnings
 from glob import glob
 
 import torch
+from tqdm import tqdm
 
 sys.path.append(".")
 from src import PoseEstimation
-from src.visualize import Visualizer
+from src.utils import json_handler, vis
+from src.utils.video import Capture, Writer
 
-warnings.simplefilter("ignore")
+warnings.filterwarnings("ignore")
 
 
 def parser():
@@ -44,7 +46,6 @@ def main():
     # load video paths
     video_dir = args.video_dir
     video_paths = sorted(glob(os.path.join(video_dir, "*.mp4")))
-    print(f"=> video paths:\n{video_paths}")
 
     # prepairing output data dirs
     out_dirs = []
@@ -57,15 +58,40 @@ def main():
     # load model
     pe = PoseEstimation(args.cfg_path, args.gpu)
 
-    if args.video:
-        vis = Visualizer(args)
+    for video_path, out_dir in zip(tqdm(video_paths, ncols=100), out_dirs):
 
-    for video_path, out_dir in zip(video_paths, out_dirs):
-        print(f"=> processing {video_path}")
-        pe.inference(video_path, out_dir)
+        # load video
+        cap = Capture(video_path)
+
+        # predict
+        results = []
+        if args.video:
+            out_frames = []
+        for frame_num in tqdm(range(cap.frame_count), ncols=100, leave=False):
+            frame = cap.read()[1]
+            preds = pe.predict(frame, frame_num)
+            results.append(preds)
+
+            if args.video:
+                out_frames.append(vis.write_frame(frame))
+
+        # save results
+        data_path = os.path.join(out_dir, "json", "pose.json")
+        json_handler.dump(results, data_path)
+        data_path = os.path.join(out_dir, "json", "frame_shape.json")
+        json_handler.dump(cap.size, data_path)
 
         if args.video:
-            vis.visualise(video_path, out_dir)
+            video_num = os.path.basename(video_path).split(".")[0]
+            out_video_path = os.path.join(out_dir, f"{video_num}_pose.mp4")
+            wtr = Writer(out_video_path, cap.fps, cap.size)
+            wtr.write_each(out_frames)
+
+        pe.reset_tracker()
+
+        del cap
+        if args.video:
+            del wtr, out_frames
 
 
 if __name__ == "__main__":

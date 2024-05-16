@@ -14,7 +14,7 @@ from tqdm import tqdm
 sys.path.append(".")
 from src.pose import PoseDataFormat, PoseDataHandler
 from src.utils.video import Capture, Writer
-from src.visualize import pose as pose_vis
+from src.utils import vis as pose_vis
 
 warnings.simplefilter("ignore")
 

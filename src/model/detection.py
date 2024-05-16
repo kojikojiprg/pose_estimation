@@ -1,4 +1,3 @@
-import gc
 import os
 from types import SimpleNamespace
 from typing import List, Tuple
@@ -31,7 +30,6 @@ class Detector:
 
     def __del__(self):
         del self._yolo, self._pose_model
-        gc.collect()
 
     def predict(self, img: np.array) -> Tuple[NDArray, NDArray]:
         bboxs = self._yolo.predict(img, verbose=False)[0].boxes.data.cpu().numpy()
