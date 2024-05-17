@@ -45,12 +45,7 @@ class Capture:
         if idx is not None:
             self.set_pos_frame_count(idx)
 
-        ret, frame = self._cap.read()
-        if ret:
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # BGR to RGB
-            return True, frame
-        else:
-            return False, None
+        return self._cap.read()
 
 
 class Writer:
@@ -68,12 +63,10 @@ class Writer:
         gc.collect()
 
     def write(self, frame):
-        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)  # RGB to BGR
         self._writer.write(frame)
 
     def write_each(self, frames):
         for frame in frames:
-            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)  # RGB to BGR
             self._writer.write(frame)
 
 
