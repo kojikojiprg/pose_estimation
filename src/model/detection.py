@@ -41,11 +41,10 @@ class Detector:
             bboxs[:, :4],
             bbox_format="xyxy",
         )
+        kps = self._collect_kps(pose_results)
 
         # extract unique result
-        # bboxs = self._get_bboxs_from_det_results(pose_results)
-        kps = self._collect_kps(pose_results)
-        if len(kps) > 0:
+        if len(bboxs) > 0:
             remain_indices = self._del_leaky(kps)
             remain_indices = self._get_unique(kps, remain_indices)
             bboxs = bboxs[remain_indices]
