@@ -1,11 +1,9 @@
-import sys
 from types import SimpleNamespace
 
 import numpy as np
 from numpy.typing import NDArray
 
-sys.path.append("submodules/BoostTrack/")
-from tracker.boost_track import BoostTrack
+from .ext import BoostTrack
 
 
 class Tracker:

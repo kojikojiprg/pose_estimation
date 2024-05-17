@@ -55,10 +55,10 @@ def main():
         out_dirs.append(out_dir)
         os.makedirs(out_dir, exist_ok=True)
 
-    # load model
-    pe = PoseEstimation(args.cfg_path, args.gpu)
-
     for video_path, out_dir in zip(tqdm(video_paths, ncols=100), out_dirs):
+        # load model
+        pe = PoseEstimation(args.cfg_path, args.gpu)
+
         # load video
         cap = Capture(video_path)
 
@@ -69,7 +69,7 @@ def main():
         for frame_num in tqdm(range(cap.frame_count), ncols=100, leave=False):
             frame = cap.read()[1]
             preds = pe.predict(frame, frame_num)
-            results.append(preds)
+            results += preds
 
             if args.video:
                 out_frames.append(vis.write_frame(frame, preds, frame_num))
@@ -86,8 +86,7 @@ def main():
             wtr = Writer(out_video_path, cap.fps, cap.size)
             wtr.write_each(out_frames)
 
-        pe.reset_tracker()
-
+        del pe
         del cap
         if args.video:
             del wtr, out_frames
