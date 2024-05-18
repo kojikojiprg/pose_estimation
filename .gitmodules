@@ -1,7 +1,3 @@
-[submodule "submodules/BoostTrack"]
-	path = submodules/BoostTrack
-	url = https://github.com/vukasin-stanojevic/BoostTrack.git
-	ignore = dirty
 [submodule "submodules/mmpose"]
 	path = submodules/mmpose
 	url = https://github.com/open-mmlab/mmpose.git
